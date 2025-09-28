@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-commerce Backend Assessment Demo</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            background: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .nav-tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+
+        .nav-tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .content-section {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .demo-button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .demo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .demo-button:active {
+            transform: translateY(0);
+        }
+
+        .result-container {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .db-schema {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .table-card {
+            background: #fff;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .table-card:hover {
+            border-color: #4CAF50;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .table-name {
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        .api-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+
+        .json-display {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        .shopping-cart {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .product-card {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .product-card:hover {
+            border-color: #4CAF50;
+            transform: translateY(-2px);
+        }
+
+        .cart-sidebar {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🛒 E-commerce Backend Assessment Demo</h1>
+            <p>Complete Backend Solution with Node.js + Express + PostgreSQL</p>
+            <p><strong>By:</strong> [Your Name] | <strong>Position:</strong> Backend Developer</p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showSection('overview')">📋 Overview</button>
+            <button class="nav-tab" onclick="showSection('database')">🗄️ Database</button>
+            <button class="nav-tab" onclick="showSection('queries')">📊 SQL Queries</button>
+            <button class="nav-tab" onclick="showSection('apis')">🔌 APIs</button>
+            <button class="nav-tab" onclick="showSection('demo')">🛒 Shopping Demo</button>
+        </div>
+
+        <!-- Overview Section -->
+        <div id="overview" class="content-section active">
+            <h2>📋 Assessment Challenge Overview</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+                <div class="table-card">
+                    <div class="table-name">✅ Question A: Database Design</div>
+                    <p>Designed relational database with proper normalization (1NF, 2NF, 3NF)</p>
+                    <ul>
+                        <li>12 tables with proper relationships</li>
+                        <li>Multi-store inventory management</li>
+                        <li>Flexible voucher system</li>
+                    </ul>
+                </div>
+                <div class="table-card">
+                    <div class="table-name">✅ Question B: Insert Order</div>
+                    <p>Complex order insertion for user "assessment"</p>
+                    <ul>
+                        <li>User and address creation</li>
+                        <li>Product variant handling</li>
+                        <li>Complete order flow</li>
+                    </ul>
+                </div>
+                <div class="table-card">
+                    <div class="table-name">✅ Question C: Average Order Value</div>
+                    <p>Analytics query for business insights</p>
+                    <ul>
+                        <li>Monthly breakdown</li>
+                        <li>Current year filtering</li>
+                        <li>Status validation</li>
+                    </ul>
+                </div>
+                <div class="table-card">
+                    <div class="table-name">✅ Question D: Churn Rate</div>
+                    <p>Complex customer behavior analysis</p>
+                    <ul>
+                        <li>6-month period comparison</li>
+                        <li>Customer segmentation</li>
+                        <li>Percentage calculation</li>
+                    </ul>
+                </div>
+                <div class="table-card">
+                    <div class="table-name">✅ Question E: API Specifications</div>
+                    <p>RESTful API design documentation</p>
+                    <ul>
+                        <li>5 endpoint specifications</li>
+                        <li>Request/response formats</li>
+                        <li>HTTP status codes</li>
+                    </ul>
+                </div>
+                <div class="table-card">
+                    <div class="table-name">✅ Question F: Implementation</div>
+                    <p>Full Node.js + Express backend</p>
+                    <ul>
+                        <li>All APIs working</li>
+                        <li>Database integration</li>
+                        <li>Email service</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Database Section -->
+        <div id="database" class="content-section">
+            <h2>🗄️ Database Schema Design</h2>
+            <p><strong>Normalization Levels:</strong> 1NF (Atomic values), 2NF (No partial dependencies), 3NF (No transitive dependencies)</p>
+            
+            <div class="db-schema">
+                <div class="table-card">
+                    <div class="table-name">👥 users</div>
+                    <p>User account information</p>
+                    <small>Fields: id, name, email, phone, created_at</small>
+                </div>
+                <div class="table-card">
+                    <div class="table-name">📍 addresses</div>
+                    <p>User addresses (1:N with users)</p>
+                    <small>Fields: id, user_id, province, district, commune</small>
+                </div>
+                <div class="table-card">
+                    <div class="table-name">📂 categories</div>
+                    <p>Product categories with discounts</p>
+                    <small>Fields: id, name, discount_percentage</small>
+                </div>
+                <div class="table-card">
+                    <div class="table-name">🏪 stores</div>
+                    <p>Physical store locations</p>
+                    <small>Fields: id, name, address, phone</small>
+                </div>
+                <div class="table-card">
+                    <div class="table-name">📦 products</div>
+                    <p>Base product information</p>
+                    <small>Fields: id, name, price, category_id</small>
+                </div>
+                <div class="table-card">
+                    <div class="table-name">🎯 product_variants</div>
+                    <p>Product variations (size, color)</p>
+                    <small>Fields: id, product_id, size, color, sku</small>
+                </div>
+                <div class="table-card">
+                    <div class="table-name">📊 store_inventory</div>
+                    <p>Stock levels per store</p>
+                    <small>Fields: store_id, product_variant_id, quantity</small>
+                </div>
+                <div class="table-card">
+                    <div class="table-name">🎫 vouchers</div>
+                    <p>Discount vouchers</p>
+                    <small>Fields: id, code, discount_type, discount_value</small>
+                </div>
+                <div class="table-card">
+                    <div class="table-name">🛍️ orders</div>
+                    <p>Customer orders</p>
+                    <small>Fields: id, user_id, total_amount, final_amount</small>
+                </div>
+                <div class="table-card">
+                    <div class="table-name">📝 order_items</div>
+                    <p>Items in each order</p>
+                    <small>Fields: order_id, product_variant_id, quantity</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- SQL Queries Section -->
+        <div id="queries" class="content-section">
+            <h2>📊 SQL Queries Demo</h2>
+            
+            <div style="margin: 20px 0;">
+                <h3>Average Order Value by Month</h3>
+                <p>Calculate average order value for each month in current year</p>
+                <button class="demo-button" onclick="runAverageOrderQuery()">
+                    <span id="avg-loading" style="display: none;" class="loading"></span>
+                    Run Query
+                </button>
+                <div id="avg-result" class="result-container" style="display: none;"></div>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <h3>Customer Churn Rate</h3>
+                <p>Calculate churn rate: customers who didn't purchase in last 6 months but did in previous 6</p>
+                <button class="demo-button" onclick="runChurnQuery()">
+                    <span id="churn-loading" style="display: none;" class="loading"></span>
+                    Run Query
+                </button>
+                <div id="churn-result" class="result-container" style="display: none;"></div>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <h3>Insert Sample Order</h3>
+                <p>Insert order for user "assessment" buying KAPPA Women's Sneakers</p>
+                <button class="demo-button" onclick="insertSampleOrder()">
+                    <span id="insert-loading" style="display: none;" class="loading"></span>
+                    Insert Order
+                </button>
+                <div id="insert-result" class="result-container" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- APIs Section -->
+        <div id="apis" class="content-section">
+            <h2>🔌 RESTful APIs Demo</h2>
+            
+            <div class="api-form">
+                <h3>1. Get All Categories</h3>
+                <button class="demo-button" onclick="testCategoriesAPI()">GET /api/categories</button>
+                <div id="categories-result" class="result-container" style="display: none;"></div>
+            </div>
+
+            <div class="api-form">
+                <h3>2. Search Products</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div class="form-group">
+                        <label>Search Query:</label>
+                        <input type="text" id="search-query" placeholder="e.g., sneakers" value="sneakers">
+                    </div>
+                    <div class="form-group">
+                        <label>Min Price:</label>
+                        <input type="number" id="min-price" placeholder="500000" value="500000">
+                    </div>
+                    <div class="form-group">
+                        <label>Max Price:</label>
+                        <input type="number" id="max-price" placeholder="2000000" value="2000000">
+                    </div>
+                </div>
+                <button class="demo-button" onclick="testSearchAPI()">GET /api/products/search</button>
+                <div id="search-result" class="result-container" style="display: none;"></div>
+            </div>
+
+            <div class="api-form">
+                <h3>3. Create Order</h3>
+                <button class="demo-button" onclick="testCreateOrder()">POST /api/orders</button>
+                <div id="order-result" class="result-container" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Shopping Demo Section -->
+        <div id="demo" class="content-section">
+            <h2>🛒 E-commerce Shopping Demo</h2>
+            <p>Interactive shopping experience with real backend integration</p>
+            
+            <div class="shopping-cart">
+                <div>
+                    <h3>Products</h3>
+                    <div class="product-grid" id="product-grid">
+                        <!-- Products will be loaded here -->
+                    </div>
+                </div>
+                
+                <div class="cart-sidebar">
+                    <h3>Shopping Cart</h3>
+                    <div id="cart-items"></div>
+                    <div style="margin-top: 20px;">
+                        <strong>Total: <span id="cart-total">0 VNĐ</span></strong>
+                    </div>
+                    <button class="demo-button" onclick="checkoutCart()" style="width: 100%; margin-top: 15px;">
+                        Checkout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let cart = [];
+        const API_BASE = 'http://localhost:3000/api';
+
+        // Tab switching
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active from all tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected section and activate tab
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Utility functions
+        function showLoading(elementId) {
+            document.getElementById(elementId).style.display = 'inline-block';
+        }
+
+        function hideLoading(elementId) {
+            document.getElementById(elementId).style.display = 'none';
+        }
+
+        function showResult(containerId, data) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="json-display">${JSON.stringify(data, null, 2)}</div>`;
+            container.style.display = 'block';
+        }
+
+        function showError(containerId, error) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="error-message">Error: ${error.message || error}</div>`;
+            container.style.display = 'block';
+        }
+
+        // SQL Queries Functions
+        async function runAverageOrderQuery() {
+            showLoading('avg-loading');
+            try {
+                // In real implementation, you would create a custom endpoint for this
+                const response = await fetch(`${API_BASE}/analytics/average-order-value`);
+                const data = await response.json();
+                showResult('avg-result', data);
+            } catch (error) {
+                showError('avg-result', error);
+            } finally {
+                hideLoading('avg-loading');
+            }
+        }
+
+        async function runChurnQuery() {
+            showLoading('churn-loading');
+            try {
+                const response = await fetch(`${API_BASE}/analytics/churn-rate`);
+                const data = await response.json();
+                showResult('churn-result', data);
+            } catch (error) {
+                showError('churn-result', error);
+            } finally {
+                hideLoading('churn-loading');
+            }
+        }
+
+        async function insertSampleOrder() {
+            showLoading('insert-loading');
+            try {
+                const orderData = {
+                    user_id: 1,
+                    address_id: 1,
+                    items: [{ product_variant_id: 1, quantity: 1 }],
+                    payment_method: 'credit_card'
+                };
+                
+                const response = await fetch(`${API_BASE}/orders`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+                
+                const data = await response.json();
+                showResult('insert-result', data);
+            } catch (error) {
+                showError('insert-result', error);
+            } finally {
+                hideLoading('insert-loading');
+            }
+        }
+
+        // API Testing Functions
+        async function testCategoriesAPI() {
+            try {
+                const response = await fetch(`${API_BASE}/categories`);
+                const data = await response.json();
+                showResult('categories-result', data);
+            } catch (error) {
+                showError('categories-result', error);
+            }
+        }
+
+        async function testSearchAPI() {
+            const query = document.getElementById('search-query').value;
+            const minPrice = document.getElementById('min-price').value;
+            const maxPrice = document.getElementById('max-price').value;
+            
+            const params = new URLSearchParams({
+                q: query,
+                min_price: minPrice,
+                max_price: maxPrice
+            });
+            
+            try {
+                const response = await fetch(`${API_BASE}/products/search?${params}`);
+                const data = await response.json();
+                showResult('search-result', data);
+            } catch (error) {
+                showError('search-result', error);
+            }
+        }
+
+        async function testCreateOrder() {
+            const orderData = {
+                user_id: 1,
+                address_id: 1,
+                items: [
+                    { product_variant_id: 1, quantity: 1 }
+                ],
+                voucher_codes: ['DISCOUNT10'],
+                payment_method: 'credit_card'
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/orders`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+                
+                const data = await response.json();
+                showResult('order-result', data);
+            } catch (error) {
+                showError('order-result', error);
+            }
+        }
+
+        // Shopping Demo Functions
+        async function loadProducts() {
+            try {
+                const response = await fetch(`${API_BASE}/products/search?limit=6`);
+                const data = await response.json();
+                
+                const productGrid = document.getElementById('product-grid');
+                productGrid.innerHTML = data.data.map(product => `
+                    <div class="product-card">
+                        <h4>${product.name}</h4>
+                        <p><strong>${product.price.toLocaleString('vi-VN')} VNĐ</strong></p>
+                        <p>Category: ${product.category.name}</p>
+                        <button class="demo-button" onclick="addToCart(${product.id}, '${product.name}', ${product.price})">
+                            Add to Cart
+                        </button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Failed to load products:', error);
+            }
+        }
+
+        function addToCart(productId, productName, price) {
+            const existingItem = cart.find(item => item.id === productId);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    id: productId,
+                    name: productName,
+                    price: price,
+                    quantity: 1
+                });
+            }
+            
+            updateCartDisplay();
+        }
+
+        function updateCartDisplay() {
+            const cartItems = document.getElementById('cart-items');
+            const cartTotal = document.getElementById('cart-total');
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p>Cart is empty</p>';
+                cartTotal.textContent = '0 VNĐ';
+                return;
+            }
+            
+            let total = 0;
+            cartItems.innerHTML = cart.map(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                
+                return `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>${item.name} x${item.quantity}</span>
+                        <span>${itemTotal.toLocaleString('vi-VN')} VNĐ</span>
+                    </div>
+                `;
+            }).join('');
+            
+            cartTotal.textContent = `${total.toLocaleString('vi-VN')} VNĐ`;
+        }
+
+        async function checkoutCart() {
+            if (cart.length === 0) {
+                alert('Cart is empty!');
+                return;
+            }
+            
+            try {
+                const orderData = {
+                    user_id: 1,
+                    address_id: 1,
+                    items: cart.map(item => ({
+                        product_variant_id: item.id,
+                        quantity: item.quantity
+                    })),
+                    payment_method: 'credit_card'
+                };
+                
+                const response = await fetch(`${API_BASE}/orders`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Order placed successfully!');
+                    cart = [];
+                    updateCartDisplay();
+                } else {
+                    alert('Failed to place order: ' + (data.message || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error placing order: ' + error.message);
+            }
+        }
+
+        // Initialize the demo
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProducts();
+        });
+    </script>
+</body>
+</html>
