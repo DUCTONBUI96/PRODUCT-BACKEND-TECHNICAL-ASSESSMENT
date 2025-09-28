@@ -258,7 +258,7 @@
         <div class="header">
             <h1>🛒 E-commerce Backend Assessment Demo</h1>
             <p>Complete Backend Solution with Node.js + Express + PostgreSQL</p>
-            <p><strong>By:</strong> [Your Name] | <strong>Position:</strong> Backend Developer</p>
+            <p><strong>By:</strong> Bui Duc Ton | <strong>Position:</strong> Backend Developer</p>
         </div>
 
         <!-- Navigation -->
@@ -334,61 +334,23 @@
         <!-- Database Section -->
         <div id="database" class="content-section">
             <h2>🗄️ Database Schema Design</h2>
-            <p><strong>Normalization Levels:</strong> 1NF (Atomic values), 2NF (No partial dependencies), 3NF (No transitive dependencies)</p>
-            
-            <div class="db-schema">
-                <div class="table-card">
-                    <div class="table-name">👥 users</div>
-                    <p>User account information</p>
-                    <small>Fields: id, name, email, phone, created_at</small>
-                </div>
-                <div class="table-card">
-                    <div class="table-name">📍 addresses</div>
-                    <p>User addresses (1:N with users)</p>
-                    <small>Fields: id, user_id, province, district, commune</small>
-                </div>
-                <div class="table-card">
-                    <div class="table-name">📂 categories</div>
-                    <p>Product categories with discounts</p>
-                    <small>Fields: id, name, discount_percentage</small>
-                </div>
-                <div class="table-card">
-                    <div class="table-name">🏪 stores</div>
-                    <p>Physical store locations</p>
-                    <small>Fields: id, name, address, phone</small>
-                </div>
-                <div class="table-card">
-                    <div class="table-name">📦 products</div>
-                    <p>Base product information</p>
-                    <small>Fields: id, name, price, category_id</small>
-                </div>
-                <div class="table-card">
-                    <div class="table-name">🎯 product_variants</div>
-                    <p>Product variations (size, color)</p>
-                    <small>Fields: id, product_id, size, color, sku</small>
-                </div>
-                <div class="table-card">
-                    <div class="table-name">📊 store_inventory</div>
-                    <p>Stock levels per store</p>
-                    <small>Fields: store_id, product_variant_id, quantity</small>
-                </div>
-                <div class="table-card">
-                    <div class="table-name">🎫 vouchers</div>
-                    <p>Discount vouchers</p>
-                    <small>Fields: id, code, discount_type, discount_value</small>
-                </div>
-                <div class="table-card">
-                    <div class="table-name">🛍️ orders</div>
-                    <p>Customer orders</p>
-                    <small>Fields: id, user_id, total_amount, final_amount</small>
-                </div>
-                <div class="table-card">
-                    <div class="table-name">📝 order_items</div>
-                    <p>Items in each order</p>
-                    <small>Fields: order_id, product_variant_id, quantity</small>
-                </div>
-            </div>
-        </div>
+            <pre class="mermaid">
+          erDiagram
+              users ||--o{ addresses : has
+              users ||--o{ orders : places
+              orders ||--o{ order_items : contains
+              products ||--o{ product_variants : has
+              product_variants ||--o{ store_inventory : stocked_in
+              categories ||--o{ products : includes
+              vouchers ||--o{ orders : applied_to
+            </pre>
+          </div>
+          
+          <script type="module">
+            import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+            mermaid.initialize({ startOnLoad: true });
+          </script>
+          
 
         <!-- SQL Queries Section -->
         <div id="queries" class="content-section">
